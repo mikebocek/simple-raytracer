@@ -10,8 +10,14 @@ class Sphere():
         self.radius = radius
     
     def intersection_point(self, source, ray):
+        """
+        Given the point of view and a vector representing 
+        a ray from the point of view, return the point of
+        intersection between the ray and the sphere
+        """
         direction = ray-source / np.linalg.norm(ray - source)
         center_direction = source - self.center
+        # Coefficients for quadratic equation
         a = direction @ direction
         b = 2 * direction @ center_direction
         c = center_direction @ center_direction - np.square(self.radius) 
@@ -25,6 +31,10 @@ class Sphere():
         return source + t * direction
 
     def normal_vector(self, intersection):
+        """
+        Given a point of intersection return the normal
+        vector to the surface of the sphere
+        """
         return intersection - self.center
 
     def color(self, intersection_point, light_sources):
