@@ -1,16 +1,16 @@
-import profile
-
 import numpy as np
 import matplotlib.pyplot as plt
 
-from objects import Camera, Sphere, Light
+from objects import Sphere
+from camera import Camera
+from lights import PointLight
 
 height = 500
 width = 500
 
 c = Camera(np.array([0,0,-4.0]), np.array([0,0,2.0]), width, height, 30, 2)
 spheres = [Sphere(np.array([0,0,5]), 1)]
-lights = [Light(np.array([1000,1000,-1000]))]
+lights = [PointLight(np.array([1000,1000,-1000])), PointLight(np.array([1000,-1000,45]))]
 
 pixels = np.zeros((height, width))
 
