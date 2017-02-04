@@ -56,5 +56,18 @@ class Sphere():
             solution_2 = (-b - np.sqrt(discriminant_sq))/(2*a)
             t = min(solution_1, solution_2)
             return source + t * direction
-    def normal_vector(intersection):
+    def normal_vector(self, intersection):
         return intersection - self.center
+    def color(self, intersection_point, light_sources):
+        base_color = 0.5
+        color = 0
+        normal_vector = self.normal_vector(intersection_point)
+        for light_source in light_sources:
+            normed_light = (intersection_point - light_source.point)
+            normed_light /= np.linalg.norm(normed_light)
+            color += base_color * (normal_vector @ normed_light)
+        return color
+
+class Light():
+    def __init__(self, point):
+        self.point = point
