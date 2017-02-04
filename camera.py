@@ -1,3 +1,5 @@
+import numpy as np
+
 class Camera():
     """
     Represents a camera view within the scene
