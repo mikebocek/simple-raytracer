@@ -27,7 +27,7 @@ class Sphere():
         else:
             solution_1 = (-b + np.sqrt(discriminant_sq))/(2*a)
             solution_2 = (-b - np.sqrt(discriminant_sq))/(2*a)
-            t = max(solution_1, solution_2)
+            t = min(solution_1, solution_2)
         return source + t * direction
 
     def normal_vector(self, intersection):
@@ -35,4 +35,5 @@ class Sphere():
         Given a point of intersection return the normal
         vector to the surface of the sphere
         """
-        return intersection - self.center
+        vec = intersection - self.center
+        return vec/np.linalg.norm(vec)
