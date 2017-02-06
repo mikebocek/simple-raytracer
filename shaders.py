@@ -9,5 +9,5 @@ class LambertShader():
         for light_source in light_sources[:1]:
             normed_light = (intersection_point - light_source.point)
             normed_light /= np.linalg.norm(normed_light)
-            color.color = np.array([0,0.3,0]) * (normal_vector @ normed_light)
+            color = Color(material_color.color[0:3] * (normal_vector @ normed_light))
         return color
