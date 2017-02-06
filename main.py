@@ -7,17 +7,17 @@ from lights import PointLight
 from shaders import LambertShader
 from color import Color
 
-width = 640
-height = 480
+width = 320
+height = 240
 
 c = Camera(np.array([0,0,-4.0]), np.array([0,0,2.0]), height, width, 30, 2)
-spheres = [Sphere(np.array([0,0,5]), 1), Sphere(np.array([4,0,10]), 1)]
-lights = [PointLight(np.array([-1000,-1000,1000]))]
+spheres = [Sphere(np.array([0,0,5]), 0.5), Sphere(np.array([2,2,5]), 1)]
+lights = [PointLight(np.array([-400,-400,10])), PointLight(np.array([400,-400,10]))]
 
 pixels = np.zeros((height, width, 3))
 
 material = LambertShader()
-texture = Color([0.0,0.3,0.3])
+texture = Color([1,0,0])
 bg_color = Color([0,0,0])
 
 def truncate(vector, minimum, maximum):
@@ -26,7 +26,6 @@ def truncate(vector, minimum, maximum):
 
 
 def main():
-    print(texture.color[0:3])
     for i in range(height):
         for j in range(width):
             v = c.vector_from_pixels(i, j)
@@ -34,7 +33,17 @@ def main():
                 p = sphere.intersection_point(c.pos, v)
                 if p is not None:
                     n = sphere.normal_vector(p)
-                    pixels[i, j, :] = truncate(255 * material.shade(p, n, texture, lights).color[0:3], 0, 255)
+                    point_color = Color([0,0,0.0])
+                    for light_source in lights:
+                        v = p - light_source.point
+                        shadow = False
+                        for other_sphere in spheres:
+                            p2 = other_sphere.intersection_point(p, v)
+                            if p2 is not None and other_sphere != sphere:
+                                shadow = True
+                        if not shadow:
+                            point_color.color += material.shade(p, n, texture, light_source).color
+                    pixels[i, j, :] = truncate(255 * point_color.color[0:3], 0, 255)
                     break
                 else:
                     pixels[i, j, :] = truncate(255*bg_color.color[0:3], 0 ,255)

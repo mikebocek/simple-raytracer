@@ -37,3 +37,6 @@ class Sphere():
         """
         vec = intersection - self.center
         return vec/np.linalg.norm(vec)
+
+    def __eq__(self, other):
+        return all(self.center == other.center) and self.radius == other.radius
