@@ -1,13 +1,17 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
+from color import Color
+
 class Sphere():
     """
     Object representing a sphere in the scene
     """
-    def __init__(self, center, radius):
+    def __init__(self, center, radius, texture, shaders):
         self.center = center
         self.radius = radius
+        self.shaders = shaders
+        self.texture = texture 
     
     def intersection_point(self, source, ray):
         """
@@ -37,6 +41,12 @@ class Sphere():
         """
         vec = intersection - self.center
         return vec/np.linalg.norm(vec)
+
+    def shade(self, point, light_source):
+        composite_color = Color([0,0,0])
+        for shader in self.shaders:
+            composite_color.color += shader.compute_color(point, self.normal_vector(point), self.texture, light_source).color
+        return composite_color
 
     def __eq__(self, other):
         return all(self.center == other.center) and self.radius == other.radius
