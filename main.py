@@ -7,20 +7,25 @@ from lights import PointLight
 from shaders import LambertShader
 from color import Color
 
-width = 320
-height = 240
+class Scene():
+    def __init__(self, camera, objects, lights):
+        self.camera = camera
+        self.objects = objects
+        self.lights = lights
+        self.pixels = np.zeros((camera.x_pixels, camera.y_pixels, 3))
 
-c = Camera(np.array([0,0,-4.0]), np.array([0,0,2.0]), height, width, 30, 2)
-spheres = [Sphere(np.array([0,0,5]), 0.5, Color([1,0,0]), [LambertShader()]), 
-           Sphere(np.array([2,1,5]), 0.5, Color([0,1,0]), [LambertShader()])]
-
-lights = [PointLight(np.array([0,2,-4.0]))]
-
-pixels = np.zeros((height, width, 3))
-
-material = LambertShader()
-texture = Color([1,0,0])
-bg_color = Color([0,0,0])
+    def render(self):
+        for i in range(self.camera.x_pixels):
+            for j in range(self.camera.y_pixels):
+                v = self.camera.vector_from_pixels(i, j)
+                for obj in self.objects:
+                    p = obj.intersection_point(self.camera.pos, v)
+                    if p is not None:
+                        point_color = Color([0,0,0.0])
+                        for light_source in self.lights:
+                            point_color.color += obj.shade(p, light_source).color
+                        self.pixels[i, j, :] = truncate(255 * point_color.color[0:3], 0, 255)
+        return self.pixels
 
 def truncate(vector, minimum, maximum):
     min_truncated = np.max(np.array([vector, np.full(vector.shape, minimum, dtype=np.int64)]), axis=0)
@@ -28,30 +33,17 @@ def truncate(vector, minimum, maximum):
 
 
 def main():
-    for i in range(height):
-        for j in range(width):
-            v = c.vector_from_pixels(i, j)
-            for sphere in spheres:
-                p = sphere.intersection_point(c.pos, v)
-                if p is not None:
-                    point_color = Color([0,0,0.0])
-                    for light_source in lights:
-                        point_color.color += sphere.shade(p, light_source).color
-                    pixels[i, j, :] = truncate(255 * point_color.color[0:3], 0, 255)
-                    """for light_source in lights:
-                        v = p - light_source.point
-                        shadow = False
-                        for other_sphere in spheres:
-                            p2 = other_sphere.intersection_point(p, v)
-                            if p2 is not None and other_sphere != sphere:
-                                shadow = True
-                        if not shadow:
-                            point_color.color += material.shade(p, n, texture, light_source).color
-                    pixels[i, j, :] = truncate(255 * point_color.color[0:3], 0, 255)
-                    break
-                else:
-                    pixels[i, j, :] = truncate(255*bg_color.color[0:3], 0 ,255)
-"""
+    
+    camera = Camera(np.array([0,0,-4.0]), np.array([0,0,2.0]), 240, 320, 30, 2)
+    
+    spheres = [Sphere(np.array([0,0,5]), 0.5, Color([1,0,0]), [LambertShader()]),
+               Sphere(np.array([2,1,5]), 0.5, Color([0,1,0]), [LambertShader()])]
+    lights = [PointLight(np.array([0,2,-4.0]))]
+    
+    scene = Scene(camera, spheres,lights)
+
+    pixels = scene.render()
+   
     np.save('test.npy', pixels)
     imsave('Sphere.png', pixels)
 
