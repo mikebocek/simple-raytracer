@@ -41,9 +41,9 @@ class Camera():
         creates a set of basis vectors for the virtual view
         plane
         """
-        self._u = np.cross(self.look_vector, np.array([0,1,0]))
+        self._u = -np.cross(np.array([1,0,0], dtype=np.float64), self.look_vector)
         self._u /= np.linalg.norm(self._u)
-        self._v = np.cross(self.look_vector, self._u) # Guaranteed to be normalized
+        self._v = np.cross(self._u, self.look_vector) # Guaranteed to be normalized
     def _obtain_look_parameters(self, field_of_view, distance_from_plane):
         """
         Using the given pixel values, generates the virtual

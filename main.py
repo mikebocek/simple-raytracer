@@ -11,8 +11,8 @@ width = 320
 height = 240
 
 c = Camera(np.array([0,0,-4.0]), np.array([0,0,2.0]), height, width, 30, 2)
-spheres = [Sphere(np.array([0,0,5]), 0.5), Sphere(np.array([2,2,5]), 1)]
-lights = [PointLight(np.array([-400,-400,10])), PointLight(np.array([400,-400,10]))]
+spheres = [Sphere(np.array([0,0,5]), 0.5), Sphere(np.array([2,1,5]), 1)]
+lights = [PointLight(np.array([0,2,-4.0]))]#, PointLight(np.array([0,-400,10]))]
 
 pixels = np.zeros((height, width, 3))
 
@@ -35,6 +35,9 @@ def main():
                     n = sphere.normal_vector(p)
                     point_color = Color([0,0,0.0])
                     for light_source in lights:
+                        point_color.color += material.shade(p, n, texture, light_source).color
+                    pixels[i, j, :] = truncate(255 * point_color.color[0:3], 0, 255)
+                    """for light_source in lights:
                         v = p - light_source.point
                         shadow = False
                         for other_sphere in spheres:
@@ -47,7 +50,7 @@ def main():
                     break
                 else:
                     pixels[i, j, :] = truncate(255*bg_color.color[0:3], 0 ,255)
-
+"""
     np.save('test.npy', pixels)
     imsave('Sphere.png', pixels)
 
