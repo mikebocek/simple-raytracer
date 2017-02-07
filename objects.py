@@ -53,3 +53,18 @@ class Sphere():
         Equality comparison
         """
         return all(self.center == other.center) and self.radius == other.radius
+
+class Plane():
+    def __init__(self, center, normal, texture, shaders):
+        self.center = center
+        self.normal = normal
+        self.texture = texture
+        self.shaders = shaders
+
+    def intersection_point(self, source, ray):
+       # TODO
+       raise NotImplementedError
+
+   def normal_vector(self):
+       return self.normal
+

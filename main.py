@@ -16,6 +16,7 @@ class Scene():
         self.camera = camera
         self.objects = objects
         self.lights = lights
+        # Array of pixels - width and height of image, with 3 color channels
         self.pixels = np.zeros((camera.x_pixels, camera.y_pixels, 3))
 
     def render(self):
