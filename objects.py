@@ -49,4 +49,7 @@ class Sphere():
         return composite_color
 
     def __eq__(self, other):
+        """
+        Equality comparison
+        """
         return all(self.center == other.center) and self.radius == other.radius
