@@ -29,7 +29,14 @@ class Scene():
                 v = self.camera.vector_from_pixels(i, j)
                 obj, intersection = self.trace_ray(self.camera.pos, v)
                 if obj is not None:
-                    point_color = self.color_point(intersection, obj)
+                    point_color = Color([0,0,0])
+                    shadow = False
+                    for light in self.lights:
+                        blocking_object, _ = self.trace_ray(intersection, light.point - intersection)
+                        if blocking_object is not None and blocking_object != obj:
+                            shadow = True
+                        if not shadow:
+                            point_color.color += obj.shade(intersection, light).color
                     self.pixels[i, j, :] = truncate(255 * point_color.color[0:3], 0, 255)
                 else:
                     self.pixels[i, j, :] = np.array([0,0,0])
@@ -47,12 +54,6 @@ class Scene():
             return None, None
         return self.objects[distances.argsort()[0]], intersection_points[distances.argsort()[0], :]
 
-    def color_point(self, intersection, obj):
-        point_color = Color([0,0,0.0])
-        for light_source in self.lights:
-            point_color.color += obj.shade(intersection, light_source).color
-        return point_color
-
 def truncate(vector, minimum, maximum):
     """
     Given an array, and a minimum and maximum, clips all
@@ -67,11 +68,11 @@ def main():
     
     camera = Camera(np.array([0, 3.5,-4]), np.array([0,0,5.0]), 120, 160, 30, 2)
     
-    obj = [Sphere(np.array([0,1,5]), 0.5, Color([1,0,0]), [LambertShader()]),
-           Sphere(np.array([2,1,5]), 0.5, Color([0,1,0]), [LambertShader()])
-           , Plane(np.array([0,-5,0]), np.array([0,1,1]), Color([0,0,1]), [LambertShader()])
+    obj = [Sphere(np.array([-1.7,1,3.5]), 0.5, Color([1,0,0]), [LambertShader()]),
+           Sphere(np.array([2,1,5]), 3, Color([0,1,0]), [LambertShader()])
+           #, Plane(np.array([0,0,7]), np.array([0,0,-1]), Color([0,0,1]), [LambertShader()])
           ]
-    lights = [PointLight(np.array([-3,4,0.0]))]
+    lights = [PointLight(np.array([-10,0,4.0]))]
     
     scene = Scene(camera, obj,lights)
 

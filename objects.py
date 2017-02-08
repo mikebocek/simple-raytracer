@@ -77,7 +77,7 @@ class Plane():
         return self.normal
 
     def shade(self, point, light_source):
-        composite_color = Color([0,0,0])
+        composite_color = Color([0,0,1])
         for shader in self.shaders:
            composite_color.color += shader.compute_color(point, self.normal_vector(point), self.texture, light_source).color
         return composite_color
