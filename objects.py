@@ -57,14 +57,27 @@ class Sphere():
 class Plane():
     def __init__(self, center, normal, texture, shaders):
         self.center = center
-        self.normal = normal
+        self.normal = normal/np.linalg.norm(normal)
         self.texture = texture
         self.shaders = shaders
+        self.offset =  -(self.center @ self.normal)
 
     def intersection_point(self, source, ray):
-       # TODO
-       raise NotImplementedError
+        ray = ray / np.linalg.norm(ray)
+        a = -(self.normal @ ray)
+        b = (self.normal @ source) + self.offset
+        if a == 0:
+            return None
+        t = b/a
+        if t < 0: # Intersection is behind camera
+            return None
+        return source + (t * ray)
 
-   def normal_vector(self):
-       return self.normal
+    def normal_vector(self, point):
+        return self.normal
 
+    def shade(self, point, light_source):
+        composite_color = Color([0,0,0])
+        for shader in self.shaders:
+           composite_color.color += shader.compute_color(point, self.normal_vector(point), self.texture, light_source).color
+        return composite_color

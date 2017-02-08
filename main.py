@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.misc import imsave
 
-from objects import Sphere
+from objects import Sphere, Plane
 from camera import Camera
 from lights import PointLight
 from shaders import LambertShader
@@ -20,31 +20,38 @@ class Scene():
         self.pixels = np.zeros((camera.x_pixels, camera.y_pixels, 3))
 
     def render(self):
-    """
-    Renders the scene described in the class, returning an array of pixel
-    values
-    """
+        """
+        Renders the scene described in the class, returning an array of pixel
+        values
+        """
         for i in range(self.camera.x_pixels):
             for j in range(self.camera.y_pixels):
                 v = self.camera.vector_from_pixels(i, j)
-                point_color = self.trace_ray(self.camera.pos, v)
-                if point_color is not None:
+                obj, intersection = self.trace_ray(self.camera.pos, v)
+                if obj is not None:
+                    point_color = self.color_point(intersection, obj)
                     self.pixels[i, j, :] = truncate(255 * point_color.color[0:3], 0, 255)
-
                 else:
                     self.pixels[i, j, :] = np.array([0,0,0])
         return self.pixels
 
     def trace_ray(self, point, vector):
-        for obj in self.objects:
+        distances = np.full(len(self.objects), np.nan)
+        intersection_points = np.full((len(self.objects), 3), np.nan)
+        for i, obj in enumerate(self.objects):
             intersection = obj.intersection_point(point, vector)
             if intersection is not None:
-                point_color = Color([0,0,0.0])
-                for light_source in self.lights:
-                    point_color.color += obj.shade(intersection, light_source).color
-                return point_color
-        else:
-            return None
+                intersection_points[i] = intersection
+                distances[i] = np.linalg.norm(intersection - self.camera.pos)
+        if not (~np.isnan(distances)).sum(): 
+            return None, None
+        return self.objects[distances.argsort()[0]], intersection_points[distances.argsort()[0], :]
+
+    def color_point(self, intersection, obj):
+        point_color = Color([0,0,0.0])
+        for light_source in self.lights:
+            point_color.color += obj.shade(intersection, light_source).color
+        return point_color
 
 def truncate(vector, minimum, maximum):
     """
@@ -58,18 +65,20 @@ def truncate(vector, minimum, maximum):
 
 def main():
     
-    camera = Camera(np.array([0,0,-4.0]), np.array([0,0,2.0]), 240, 320, 30, 2)
+    camera = Camera(np.array([0, 3.5,-4]), np.array([0,0,5.0]), 120, 160, 30, 2)
     
-    spheres = [Sphere(np.array([0,0,5]), 0.5, Color([1,0,0]), [LambertShader()]),
-               Sphere(np.array([2,1,5]), 0.5, Color([0,1,0]), [LambertShader()])]
-    lights = [PointLight(np.array([0,2,-4.0]))]
+    obj = [Sphere(np.array([0,1,5]), 0.5, Color([1,0,0]), [LambertShader()]),
+           Sphere(np.array([2,1,5]), 0.5, Color([0,1,0]), [LambertShader()])
+           , Plane(np.array([0,-5,0]), np.array([0,1,1]), Color([0,0,1]), [LambertShader()])
+          ]
+    lights = [PointLight(np.array([-3,4,0.0]))]
     
-    scene = Scene(camera, spheres,lights)
+    scene = Scene(camera, obj,lights)
 
     pixels = scene.render()
    
     np.save('test.npy', pixels)
-    imsave('Sphere.png', pixels)
+    imsave('Sphere_partial.png', pixels)
 
 if __name__ == '__main__':
     main()
